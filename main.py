@@ -7,8 +7,12 @@ from tkinter import *
 # Choose 1p or 2p 
 # Carte importer dans un fichier 
 class Memory():
+    """
+    Une classe pour gerer le jeu de memory
+    """
     def __init__(self, fen, data):
         self.fen = fen 
+
         # Fenetre principal ou afficher les trucs ( une frame )
         self.data_carte1 = data[0] 
         self.data_carte2 = data[1]
@@ -19,6 +23,8 @@ class Memory():
         self.data = self.data_carte1[:] 
         self.data.extend(self.data_carte2)
         print(self.data)
+        print(self.data_carte1)
+        print(self.data_carte2)
         # on copie la liste self.data_carte1 localement
         # on modifie la copie local en lui rajoutant la liste deux 
         # pour en faire une liste de toute les valeurs 
@@ -27,6 +33,12 @@ class Memory():
         # Liste qui contient la valeur et le boutton 
 
         self.button_click = 0
+        # Variable qui alterne entre 3 valeurs : 
+        # 0: Aucune carte de lever, 1: une carte de lever
+
+        self.valeur_1carte = None 
+        self.valeur_2carte = None
+        # Variable qui a en memoire quelle bouton est retourner
 
         self.create_button()
         # call de la fonction create button
@@ -35,16 +47,22 @@ class Memory():
         """
         Function to creat all the button on the window
         """
-        for i in range(len(self.data_carte1 * 2)):
-            button = Button(self.fen, text = " ", bg='#FFFFFF', command=partial(self.button_press, i))
+        for i in range(len(self.data)):
+            # Repeter pour le nombre de boutton a crer 
+            button = Button(self.fen, text = "", width=10, height=5, bg='#FFFFFF', command=partial(self.button_press, i))
+            # on crer un bouton vide, avec une commande qui renvois une valeur, qui , associer a l'index 
+            # de la liste nous indique le bouton ( dans la liste )
             self.liste_button.append(button)
+            # on ajoute le bouton dans la liste 
         self.affichage_boutton()
     
     def affichage_boutton(self):
         """
         Fonction pour afficher les boutons
         """
-        for i in range(len(self.liste_button)):
+        nbCarte = len(self.data)
+        # TODO : Changer la maniere ou c'est afficher avec random et tout 
+        for i in range(nbCarte):
             self.liste_button[i].grid(column=i, row=0, padx=20, pady=10, sticky=N)
 
     def button_press(self, n):
@@ -52,11 +70,72 @@ class Memory():
         Fonction quand l'utilisateur appuis sur un bouton
         """
         if self.button_click == 0:
+            # Si aucune carte est retourner 
             self.liste_button[n].configure(text = self.data[n])
+            # on affiche le texte attribuer au bouton dessus
             self.button_click = 1
-        else:
-            self.liste_button[n].configure(text = " ")
+            # on indique que un bouton a ete cliquer
+            self.valeur_1carte = n
+            # on indique quelle bouton a ete retourner 
+        elif self.button_click == 1:
+            # Si une carte est deja retourner 
+            self.liste_button[n].configure(text = self.data[n])
+            # on affiche le texte attribuer au bouton dessus
+            self.valeur_2carte = n
+            carte1 = self.liste_button[self.valeur_1carte].cget('text')
+            carte2 = self.liste_button[self.valeur_2carte].cget("text")
+            # on recupere les deux carte d'afficher
+           
+
             self.button_click = 0
+            # on indique que 2 boutton on ete cliquer, => ont remet a 0 
+
+            index_carte1 = self.data.index(carte1) 
+            # on regarde ou se trouve l'index de la carte numero 1 dans tout les donner ensemble
+            # si l'index de la carte 1 est plus grande que la longeur de la liste avec tout les donners
+            # on sais alors que l'index de la premiere carte est dans la partie 1 de la liste ,
+            # donc que la liste est self.data_carte1, sinon c'est dans self.data_carte2
+            if index_carte1 < (len(self.data) / 2):
+                index_carte1 = self.data_carte1.index(carte1)
+            else:
+                index_carte1 = self.data_carte2.index(carte1)
+
+            # on fait pareil mais pour la carte 2
+            index_carte2 = self.data.index(carte2) 
+            if index_carte2 < (len(self.data) / 2):
+                index_carte2 = self.data_carte1.index(carte2)
+            else:
+                index_carte2 = self.data_carte2.index(carte2)
+
+            if index_carte1 == index_carte2:
+                # si les cartes vont ensemble 
+                print("same index")
+                print(index_carte1, index_carte2)
+                print(carte1, carte2)
+                self.liste_button[self.valeur_1carte].config(bg="#008000")
+                self.liste_button[self.valeur_2carte].config(bg="#008000")
+                
+            else:
+                # si les cartes ne vont pas ensemble
+                print("not the same index")
+                print(index_carte1, index_carte2)
+                print(carte1, carte2)
+                self.liste_button[self.valeur_1carte].config(bg="#FF0000")
+                self.liste_button[self.valeur_2carte].config(bg="#FF0000")
+                self.fen.after(1000, self.wrong)
+            
+    
+    def wrong(self):
+        print("here")
+        self.liste_button[self.valeur_1carte].config(bg="#FFFFFF")
+        self.liste_button[self.valeur_1carte].config(text=" ")
+        self.valeur_1carte = None
+        self.liste_button[self.valeur_2carte].config(bg="#FFFFFF")
+        self.liste_button[self.valeur_2carte].config(text=" ")
+        self.valeur_2carte = None
+        # on remet la valeur de la carte1 a 0 
+        # on remet la valeur de la carte2 a 0 
+
 
         # sleep(1)
         # self.liste_button[n].configure(text = " ")
