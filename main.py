@@ -1,5 +1,4 @@
 from functools import partial
-from time import sleep
 from tkinter import *
 
 
@@ -11,7 +10,10 @@ class Memory():
     Une classe pour gerer le jeu de memory
     """
     def __init__(self, fen, data):
-        self.fen = fen 
+        self.fen = Frame(fen)
+        self.fen.grid()
+
+        self.police = ('Helvetic', 8)
 
         # Fenetre principal ou afficher les trucs ( une frame )
         self.data_carte1 = data[0] 
@@ -49,7 +51,10 @@ class Memory():
         """
         for i in range(len(self.data)):
             # Repeter pour le nombre de boutton a crer 
-            button = Button(self.fen, text = "", width=10, height=5, bg='#FFFFFF', command=partial(self.button_press, i))
+            # TODO : changer la maniere don est afficher le texte pour que sa rentre sur le
+            button = Button(self.fen, text = "", width=20, height=5, font = self.police,
+                            bg='#FFFFFF', disabledforeground = '#000000', 
+                            command=partial(self.button_press, i))
             # on crer un bouton vide, avec une commande qui renvois une valeur, qui , associer a l'index 
             # de la liste nous indique le bouton ( dans la liste )
             self.liste_button.append(button)
@@ -77,7 +82,11 @@ class Memory():
             # on indique que un bouton a ete cliquer
             self.valeur_1carte = n
             # on indique quelle bouton a ete retourner 
-        elif self.button_click == 1:
+        elif (self.button_click == 1) and (self.liste_button[self.valeur_1carte]) != self.liste_button[n]:
+            # desactivation des bouttons 
+            for child in self.fen.winfo_children():
+                child['state'] = DISABLED
+
             # Si une carte est deja retourner 
             self.liste_button[n].configure(text = self.data[n])
             # on affiche le texte attribuer au bouton dessus
@@ -85,7 +94,6 @@ class Memory():
             carte1 = self.liste_button[self.valeur_1carte].cget('text')
             carte2 = self.liste_button[self.valeur_2carte].cget("text")
             # on recupere les deux carte d'afficher
-           
 
             self.button_click = 0
             # on indique que 2 boutton on ete cliquer, => ont remet a 0 
@@ -97,48 +105,53 @@ class Memory():
             # donc que la liste est self.data_carte1, sinon c'est dans self.data_carte2
             if index_carte1 < (len(self.data) / 2):
                 index_carte1 = self.data_carte1.index(carte1)
-            else:
-                index_carte1 = self.data_carte2.index(carte1)
-
+            else: index_carte1 = self.data_carte2.index(carte1)
+            
             # on fait pareil mais pour la carte 2
             index_carte2 = self.data.index(carte2) 
             if index_carte2 < (len(self.data) / 2):
                 index_carte2 = self.data_carte1.index(carte2)
-            else:
-                index_carte2 = self.data_carte2.index(carte2)
+            else: index_carte2 = self.data_carte2.index(carte2)
 
             if index_carte1 == index_carte2:
                 # si les cartes vont ensemble 
-                print("same index")
-                print(index_carte1, index_carte2)
-                print(carte1, carte2)
                 self.liste_button[self.valeur_1carte].config(bg="#008000")
                 self.liste_button[self.valeur_2carte].config(bg="#008000")
+                # on les affiches en vert
+                self.fen.after(1500, self.good)
+                # on attend 1.5s => apelle 
                 
             else:
                 # si les cartes ne vont pas ensemble
-                print("not the same index")
-                print(index_carte1, index_carte2)
-                print(carte1, carte2)
                 self.liste_button[self.valeur_1carte].config(bg="#FF0000")
                 self.liste_button[self.valeur_2carte].config(bg="#FF0000")
+                # on les affiche en rouge 
                 self.fen.after(1000, self.wrong)
+                # on attend 1s => apelle 
             
-    
     def wrong(self):
-        print("here")
+        """
+        call when carte are worng
+        """
         self.liste_button[self.valeur_1carte].config(bg="#FFFFFF")
         self.liste_button[self.valeur_1carte].config(text=" ")
         self.valeur_1carte = None
+        # on remet la valeur de la carte1 a 0 
         self.liste_button[self.valeur_2carte].config(bg="#FFFFFF")
         self.liste_button[self.valeur_2carte].config(text=" ")
         self.valeur_2carte = None
-        # on remet la valeur de la carte1 a 0 
         # on remet la valeur de la carte2 a 0 
+        for child in self.fen.winfo_children():
+            child['state'] = NORMAL
+        # reactivation des bouttons
 
-
-        # sleep(1)
-        # self.liste_button[n].configure(text = " ")
+    def good(self):
+        self.liste_button[self.valeur_1carte].destroy()
+        self.liste_button[self.valeur_2carte].destroy()
+        # destruction des bouttons
+        for child in self.fen.winfo_children():
+            child['state'] = NORMAL
+        # reactivation des bouttons
 
 
 
@@ -167,7 +180,8 @@ class Applications():
         with open("Carte_memory.txt", "r") as file:
             # we open the file and store all of his lines in a list
             lines = file.readlines()
-        
+        lines = [x for x in lines if x!='\n']
+        # suppresion des saut de lignes
         for i in range(len(lines)):
             # repeter la longeur de lignes 
             liste_ligne = lines[i].split("|",1)
@@ -221,7 +235,7 @@ class Applications():
 
         jeuMemory = Memory(self.fen, self.data)
 
-
+# TODO : changer la maniere don est afficher le texte pour que sa rentre sur le boutton
 if __name__ == "__main__":
     root = Tk()
     app = Applications(root)
