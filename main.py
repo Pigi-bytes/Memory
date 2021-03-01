@@ -3,10 +3,6 @@ from functools import partial
 from tkinter import *
 import random
 
-
-# memory game
-# Choose 1p or 2p 
-# Carte importer dans un fichier 
 class Coter():
     def __init__(self, fen):
         super().__init__()
@@ -335,8 +331,14 @@ class Applications():
         frame_principale.grid(column=0, row=0, padx=20, pady=10, sticky=N, columnspan=2)
         jeuMemory = Memory(frame_principale,frame_secondaire, self.data)
 
-
-#  TODO : changer la maniere don est afficher le texte pour que sa rentre sur le boutton
+#  TODO : Add the hability to change player and all the stuff 
+#  TODO : commentaire 
+#  TODO : optimizations 
+#  TODO : make the app more nice
+#  TODO : add the win menu / lose 
+#  TODO : changer la maniere est afficher le texte pour que sa rentre sur le boutton
+#  TODO : Setting a la voler 
+#  TODO : App to add all of the texte
 if __name__ == "__main__":
     root = Tk()
     app = Applications(root)
