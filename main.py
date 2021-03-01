@@ -7,14 +7,89 @@ import random
 # memory game
 # Choose 1p or 2p 
 # Carte importer dans un fichier 
+class Coter():
+    def __init__(self, fen):
+        super().__init__()
+        self.font = ("", 16)
+        self.fen = fen
+        self.start = default_timer()
+
+        self.right = 0
+        self.wrong = 0
+        
+        # frameP = Frame(self.fen)
+        # frameP.pack()
+
+        frame_temps = Frame(self.fen, bd='0.5', bg = "#FF0000")
+        frame_temps.grid(column=0, row=0, padx=10, pady=10, sticky=N)
+
+        label_time = Label(frame_temps, text="Time :", font=self.font)
+        label_time.grid(column=0, row=0, padx=10, pady=5, sticky=N)
+
+        self.compteur_t = Label(frame_temps, text="0:00:00", font=self.font)
+        self.compteur_t.grid(column=0, row=1, padx=10, pady=5, sticky=N)
+        self.fen.after(1000, self.update_time)
+
+        frame_point = Frame(self.fen, bd='0.5', bg='#E0E055')
+        frame_point.grid(column=0, row=1, padx=5, pady=5, sticky=N)
+
+        text = "Wrong : " + str(self.wrong)
+        self.label_wrong = Label(frame_point, text = text, font=self.font)
+        self.label_wrong.grid(column=0, row=0, padx=5, pady=5, sticky=W)
+
+        text = "Right :   " + str(self.right)
+        self.label_right = Label(frame_point, text = text, font=self.font)
+        self.label_right.grid(column=0, row=1, padx=5, pady=5, sticky=W)
+
+        frame_liste = Frame(self.fen, bd='0.5', bg='#000FFF')
+        frame_liste.grid(column=0, row=2, padx=5, pady=5, sticky=N)
+
+        complete_label = Label(frame_liste, text="Liste:",font=self.font)
+        complete_label.grid(column=0, row=0, padx=5, pady=5, sticky=N)
+
+        frame_liste2 = Frame(frame_liste, bd='0.5', bg='#E0E055')
+        frame_liste2.grid(column=0, row=1, padx=5, pady=5, sticky=N)
+
+        scrollbarY = Scrollbar(frame_liste2, orient="vertical")
+        self.mylist = Listbox(frame_liste2 ,width=40, height=10, yscrollcommand=scrollbarY.set, bd=0)
+        self.mylist.select_set(0)
+        scrollbarY.config(command=self.mylist.yview)
+        scrollbarY.pack(side=RIGHT, fill=BOTH)
+        self.mylist.pack()
+
+
+    def update_time(self):
+        "Incrémente le compteur à chaque seconde"
+        now = default_timer() - self.start
+        minutes, seconds = divmod(now, 60) 
+        hours, minutes = divmod(minutes, 60)
+        str_time = "%d:%02d:%02d" % (hours, minutes, seconds)
+        self.compteur_t.configure(text=str_time)
+        self.fen.after(1000, self.update_time)
+
+    def update_wrong(self):
+        self.wrong += 1
+        text = "Wrong : " + str(self.wrong)
+        self.label_wrong.config(text = text)
+
+    def update_right(self):
+        self.right += 1
+        text = "Right : " + str(self.right)
+        self.label_right.config(text = text)
+
+    def add_liste(self, data):
+        self.mylist.insert(END, data)
+
 class Memory():
     """
     Une classe pour gerer le jeu de memory
     """
-    def __init__(self, fen, data):
-        super().__init__()
+    def __init__(self, fen, fen2, data):
+
         self.fen = Frame(fen)
-        self.fen.pack()
+        self.fen.grid()
+
+        self.coter = Coter(fen2)
         # Creation de la frame qui va afficher tout les widgets 
         self.police = ('Helvetic', 8)
         # font de l'applications
@@ -168,59 +243,19 @@ class Memory():
         # on remet la valeur de la carte2 a 0 
         for child in self.fen.winfo_children():
             child['state'] = NORMAL
+        self.coter.update_wrong()
         # reactivation des bouttons
 
     def good(self):
+        data = [self.liste_button[self.valeur_1carte].cget('text'),self.liste_button[self.valeur_2carte].cget('text')]
+        self.coter.add_liste(data)
         self.liste_button[self.valeur_1carte].destroy()
         self.liste_button[self.valeur_2carte].destroy()
         # destruction des bouttons
         for child in self.fen.winfo_children():
             child['state'] = NORMAL
+        self.coter.update_right()
         # reactivation des bouttons
-
-class VerticalScrolledFrame(Frame):
-    """A pure Tkinter scrollable frame that actually works!
-    * Use the 'interior' attribute to place widgets inside the scrollable frame
-    * Construct and pack/place/grid normally
-    * This frame only allows vertical scrolling
-
-    """
-    def __init__(self, parent, *args, **kw):
-        Frame.__init__(self, parent, *args, **kw)            
-
-        # create a canvas object and a vertical scrollbar for scrolling it
-        vscrollbar = Scrollbar(self, orient=VERTICAL)
-        vscrollbar.pack(fill=Y, side=RIGHT, expand=FALSE)
-        canvas = Canvas(self, bd=0, highlightthickness=0,
-                        yscrollcommand=vscrollbar.set)
-        canvas.pack(side=LEFT, fill=BOTH, expand=TRUE)
-        vscrollbar.config(command=canvas.yview)
-
-        # reset the view
-        canvas.xview_moveto(0)
-        canvas.yview_moveto(0)
-
-        # create a frame inside the canvas which will be scrolled with it
-        self.interior = interior = Frame(canvas)
-        interior_id = canvas.create_window(0, 0, window=interior,
-                                           anchor=NW)
-
-        # track changes to the canvas and frame width and sync them,
-        # also updating the scrollbar
-        def _configure_interior(event):
-            # update the scrollbars to match the size of the inner frame
-            size = (interior.winfo_reqwidth(), interior.winfo_reqheight())
-            canvas.config(scrollregion="0 0 %s %s" % size)
-            if interior.winfo_reqwidth() != canvas.winfo_width():
-                # update the canvas's width to fit the inner frame
-                canvas.config(width=interior.winfo_reqwidth())
-        interior.bind('<Configure>', _configure_interior)
-
-        def _configure_canvas(event):
-            if interior.winfo_reqwidth() != canvas.winfo_width():
-                # update the inner frame's width to fill the canvas
-                canvas.itemconfigure(interior_id, width=canvas.winfo_width())
-        canvas.bind('<Configure>', _configure_canvas)
 
 class Applications():
     """
@@ -233,7 +268,6 @@ class Applications():
         self.data = self.recuperations_carte()
         self.number_player = 0
         self.number_of_player()
-        self.start = default_timer()
 
     def recuperations_carte(self):
         """
@@ -293,36 +327,16 @@ class Applications():
         self.frame_player_choose.pack_forget()    
 
         # Affichage frame
-        frame_principale = VerticalScrolledFrame(self.fen, bd="0.5", bg ="#4dd0e1")
-        frame_principale.grid(column=0, row=0, padx=20, pady=10, sticky=N, columnspan=2)
-        jeuMemory = Memory(frame_principale, self.data)
-
         frame_secondaire = Frame(self.fen, bd="0.5", bg ="#5e35b1")
         frame_secondaire.grid(column=2, row=0, padx=20, pady=10, sticky=N)
+        # coter = Coter(frame_secondaire)
 
-        frame_temps = Frame(frame_secondaire, bd='0.5', bg = "#FF0000")
-        frame_temps.grid(column=0, row=0, padx=10, pady=10, sticky=N)
-
-        label_time = Label(frame_temps, text="Time :", font=("", 16))
-        label_time.grid(column=0, row=0, padx=10, pady=5, sticky=N)
-
-        self.compteur_t = Label(frame_temps, text="", font=("", 16))
-        self.compteur_t.grid(column=0, row=1, padx=10, pady=5, sticky=N)
-
-        self.fen.after(1000, self.updateTime)
-    
-    def updateTime(self):
-        "Incrémente le compteur à chaque seconde"
-        now = default_timer() - self.start
-        minutes, seconds = divmod(now, 60)
-        hours, minutes = divmod(minutes, 60)
-        str_time = "%d:%02d:%02d" % (hours, minutes, seconds)
-        self.compteur_t.configure(text=str_time)
-        self.fen.after(1000, self.updateTime)
+        frame_principale = Frame(self.fen, bd="0.5", bg ="#4dd0e1")
+        frame_principale.grid(column=0, row=0, padx=20, pady=10, sticky=N, columnspan=2)
+        jeuMemory = Memory(frame_principale,frame_secondaire, self.data)
 
 
-
-# TODO : changer la maniere don est afficher le texte pour que sa rentre sur le boutton
+#  TODO : changer la maniere don est afficher le texte pour que sa rentre sur le boutton
 if __name__ == "__main__":
     root = Tk()
     app = Applications(root)
