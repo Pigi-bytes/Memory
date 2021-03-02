@@ -371,55 +371,58 @@ class Memory():
 
 class Applications():
     """
-    Classe qui permet de gerer l'applications 
+    Class used to manage the applications
     """
     def __init__(self, fen):
-        super().__init__()
-        self.fen = fen
+        """
+        init the class
 
+            Parameters:
+                fen, Tk.frame => the main frame for the memory game
+        """
+        self.fen = fen
         self.data = self.recuperations_carte()
-        self.number_player = 0
+        # the data of the cards
         self.fenetre_principale()
 
     def recuperations_carte(self):
         """
-        Fonction qui permet de recuperer les cartes du memory depuis le fichier texte
-        renvoie la liste des cartes 
+        Function that allows you to get memory cards from the text file
+        returns the list of cards
         """
-        # ajouter un message d'erreur si sa fail
         data_memory1 = []
         data_memory2 = []
         with open("Carte_memory.txt", "r") as file:
             # we open the file and store all of his lines in a list
             lines = file.readlines()
         lines = [x for x in lines if x!='\n']
-        # suppresion des saut de lignes
+        # deletion of line breaks
         for i in range(len(lines)):
-            # repeter la longeur de lignes 
+            # repeat the length of lines
             liste_ligne = lines[i].split(";",1)
-            # on separe la liste en deux avec le character |
+            # we split the list in two with the character ;
             for j in range(2):
-                # repeter dans les deux bout de texte separer par le |
+                # repeat in both ends of text separated by the ;
                 liste_ligne[j] = liste_ligne[j].strip()
-                # on enleve les retour chariots et les espaces devant ou deriere
+                # remove the carriage returns and the spaces in front or behind
             data_memory1.append(liste_ligne[0])
             data_memory2.append(liste_ligne[1])
         return [data_memory1, data_memory2]
 
     def fenetre_principale(self):
-
-        # Affichage frame
+        """
+        Fonction pour afficher la fenetre principal
+        """
         frame_secondaire = Frame(self.fen, bd="0.5", bg ="#5e35b1")
         frame_secondaire.grid(column=2, row=0, padx=20, pady=10, sticky=N)
-        # coter = Coter(frame_secondaire)
+        # show the first frame
 
         frame_principale = Frame(self.fen, bd="0.5", bg ="#4dd0e1")
         frame_principale.grid(column=0, row=0, padx=20, pady=10, sticky=N, columnspan=2)
+        # show the secound frame
+
         jeuMemory = Memory(frame_principale, frame_secondaire, self.data)
 
-
-
-#  TODO : commentaire 
 #  TODO : optimizations 
 #  TODO : make the app more nice
 #  TODO : changer la maniere est afficher le texte pour que sa rentre sur le boutton
