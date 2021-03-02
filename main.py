@@ -2,21 +2,25 @@ from timeit import default_timer
 from functools import partial
 from tkinter import *
 import random
+import sys
+
 
 class Coter():
-    def __init__(self, fen):
+    def __init__(self, fen, bonneRep):
         super().__init__()
-        self.font = ("", 16)
+
+        self.amount_right = bonneRep
         self.fen = fen
-        self.start = default_timer()
+        self.font = ("", 16)
 
         self.right = 0
         self.wrong = 0
         
-        # frameP = Frame(self.fen)
-        # frameP.pack()
+        self.start = default_timer()
+        self.frameP = Frame(self.fen)
+        self.frameP.grid()
 
-        frame_temps = Frame(self.fen, bd='0.5', bg = "#FF0000")
+        frame_temps = Frame(self.frameP , bd='0.5', bg = "#FF0000")
         frame_temps.grid(column=0, row=0, padx=10, pady=10, sticky=N)
 
         label_time = Label(frame_temps, text="Time :", font=self.font)
@@ -26,7 +30,7 @@ class Coter():
         self.compteur_t.grid(column=0, row=1, padx=10, pady=5, sticky=N)
         self.fen.after(1000, self.update_time)
 
-        frame_point = Frame(self.fen, bd='0.5', bg='#E0E055')
+        frame_point = Frame(self.frameP , bd='0.5', bg='#E0E055')
         frame_point.grid(column=0, row=1, padx=5, pady=5, sticky=N)
 
         text = "Wrong : " + str(self.wrong)
@@ -37,22 +41,21 @@ class Coter():
         self.label_right = Label(frame_point, text = text, font=self.font)
         self.label_right.grid(column=0, row=1, padx=5, pady=5, sticky=W)
 
-        frame_liste = Frame(self.fen, bd='0.5', bg='#000FFF')
+        frame_liste = Frame(self.frameP , bd='0.5', bg='#000FFF')
         frame_liste.grid(column=0, row=2, padx=5, pady=5, sticky=N)
 
         complete_label = Label(frame_liste, text="Liste:",font=self.font)
         complete_label.grid(column=0, row=0, padx=5, pady=5, sticky=N)
 
-        frame_liste2 = Frame(frame_liste, bd='0.5', bg='#E0E055')
-        frame_liste2.grid(column=0, row=1, padx=5, pady=5, sticky=N)
+        self.frame_liste2 = Frame(frame_liste, bd='0.5', bg='#E0E055')
+        self.frame_liste2.grid(column=0, row=1, padx=5, pady=5, sticky=N)
 
-        scrollbarY = Scrollbar(frame_liste2, orient="vertical")
-        self.mylist = Listbox(frame_liste2 ,width=40, height=10, yscrollcommand=scrollbarY.set, bd=0)
+        scrollbarY = Scrollbar(self.frame_liste2, orient="vertical")
+        self.mylist = Listbox(self.frame_liste2 ,width=40, height=10, yscrollcommand=scrollbarY.set, bd=0)
         self.mylist.select_set(0)
         scrollbarY.config(command=self.mylist.yview)
         scrollbarY.pack(side=RIGHT, fill=BOTH)
         self.mylist.pack()
-
 
     def update_time(self):
         "Incrémente le compteur à chaque seconde"
@@ -61,7 +64,10 @@ class Coter():
         hours, minutes = divmod(minutes, 60)
         str_time = "%d:%02d:%02d" % (hours, minutes, seconds)
         self.compteur_t.configure(text=str_time)
-        self.fen.after(1000, self.update_time)
+        if self.right == self.amount_right:
+            self.win()
+        else:
+            self.fen.after(1000, self.update_time)
 
     def update_wrong(self):
         self.wrong += 1
@@ -72,20 +78,48 @@ class Coter():
         self.right += 1
         text = "Right : " + str(self.right)
         self.label_right.config(text = text)
+        if self.right == self.amount_right:
+            self.win()
+            pass
 
     def add_liste(self, data):
         self.mylist.insert(END, data)
+
+    def win(self):
+        """
+        condition pour si tu gagne 
+        """
+        self.frameP.grid_forget()
+        img = PhotoImage(file="coupe.gif")
+        canvas = Canvas(self.fen)
+        canvas.configure(width=img.width(), height=img.height())
+        canvas.create_image(img.width()/2,img.height()/2,image=img)
+        canvas.image = img ## Association de l'image au canva.
+        canvas.grid(row=0,column=0)
+
+        label_ = Label(self.fen, text="You win !!")
+        label_.grid(row=1, column = 0)
+
+        boutton_ = Button(self.fen, text = "Quit", command=self.quitter)
+        boutton_.grid(row=2, column = 0)
+
+    def quitter(self):
+        sys.exit()
 
 class Memory():
     """
     Une classe pour gerer le jeu de memory
     """
     def __init__(self, fen, fen2, data):
+        
+        
+        self.right = 0
+        
 
-        self.fen = Frame(fen)
-        self.fen.grid()
 
-        self.coter = Coter(fen2)
+        self.fen = fen
+        # self.fen.grid()
+
         # Creation de la frame qui va afficher tout les widgets 
         self.police = ('Helvetic', 8)
         # font de l'applications
@@ -107,7 +141,11 @@ class Memory():
         # 0: Aucune carte de lever, 1: une carte de lever
         self.valeur_1carte, self.valeur_2carte = None, None
         # Variable qui a en memoire quelle bouton est retourner
+        
+        self.amount_right = len(self.data_carte1)
 
+        self.coter = Coter(fen2, self.amount_right)
+        
         self.create_button()
         # call de la fonction create button
 
@@ -248,10 +286,17 @@ class Memory():
         self.liste_button[self.valeur_1carte].destroy()
         self.liste_button[self.valeur_2carte].destroy()
         # destruction des bouttons
-        for child in self.fen.winfo_children():
-            child['state'] = NORMAL
         self.coter.update_right()
-        # reactivation des bouttons
+        self.right += 1
+        if self.amount_right == self.right:
+            self.win()
+        else:
+            for child in self.fen.winfo_children():
+                child['state'] = NORMAL
+                # reactivation des bout
+
+    def win(self):
+        self.fen.grid_forget()
 
 class Applications():
     """
@@ -263,7 +308,7 @@ class Applications():
 
         self.data = self.recuperations_carte()
         self.number_player = 0
-        self.number_of_player()
+        self.fenetre_principale()
 
     def recuperations_carte(self):
         """
@@ -280,7 +325,7 @@ class Applications():
         # suppresion des saut de lignes
         for i in range(len(lines)):
             # repeter la longeur de lignes 
-            liste_ligne = lines[i].split("|",1)
+            liste_ligne = lines[i].split(";",1)
             # on separe la liste en deux avec le character |
             for j in range(2):
                 # repeter dans les deux bout de texte separer par le |
@@ -290,37 +335,7 @@ class Applications():
             data_memory2.append(liste_ligne[1])
         return [data_memory1, data_memory2]
 
-    def number_of_player(self):
-
-        def p1():
-            self.number_player = 1
-            self.fenetre_principale()
-
-        def p2():
-            self.number_player = 2
-            self.fenetre_principale()
-
-        self.frame_player_choose = Frame(self.fen)
-        self.frame_player_choose.pack()
-
-        frame_texte = Frame(self.frame_player_choose, bd="0.5", bg ="#4dd0e1")
-        frame_texte.grid(column=0, row=0, padx=20, pady=10, sticky=N)
-
-        frame_button = Frame(self.frame_player_choose, bd="0.5", bg="#5e35b1")
-        frame_button.grid(column=0, row=1, padx=20, pady=10, sticky=N)
-
-        label_how_many_player = Label(frame_texte, text="How many player")
-        label_how_many_player.grid(column=0, row=0, padx=20, pady=10, sticky=N)
-
-        button_1p = Button(frame_button, text="1 player", command=p1)
-        button_1p.grid(column=0, row=0, padx=5, pady=10, sticky=N)
-
-        button_2p = Button(frame_button, text="2 players", command=p2)
-        button_2p.grid(column=1, row=0, padx=5, pady=10, sticky=N)
-
     def fenetre_principale(self):
-
-        self.frame_player_choose.pack_forget()    
 
         # Affichage frame
         frame_secondaire = Frame(self.fen, bd="0.5", bg ="#5e35b1")
@@ -329,16 +344,20 @@ class Applications():
 
         frame_principale = Frame(self.fen, bd="0.5", bg ="#4dd0e1")
         frame_principale.grid(column=0, row=0, padx=20, pady=10, sticky=N, columnspan=2)
-        jeuMemory = Memory(frame_principale,frame_secondaire, self.data)
+        jeuMemory = Memory(frame_principale, frame_secondaire, self.data)
 
-#  TODO : Add the hability to change player and all the stuff 
+
+
 #  TODO : commentaire 
 #  TODO : optimizations 
 #  TODO : make the app more nice
-#  TODO : add the win menu / lose 
 #  TODO : changer la maniere est afficher le texte pour que sa rentre sur le boutton
-#  TODO : Setting a la voler 
 #  TODO : App to add all of the texte
+
+
+
+
+
 if __name__ == "__main__":
     root = Tk()
     app = Applications(root)
