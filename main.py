@@ -6,104 +6,161 @@ import sys
 
 
 class Coter():
-    def __init__(self, fen, bonneRep):
-        super().__init__()
+    """
+    class which allows to manage all the right frame
+    """
 
+    def __init__(self, fen, bonneRep):
+        """
+        Init the class
+
+            parameters:
+                fen, tk.frame() => the frame where all of the app will occur
+                bonneRep, integer => Number of good answer needed for winning
+        """
         self.amount_right = bonneRep
         self.fen = fen
         self.font = ("", 16)
+        # The font use for all of the widgets
+        self.right, self.wrong = 0, 0
+        # the number of right/wrong answer 
 
-        self.right = 0
-        self.wrong = 0
-        
         self.start = default_timer()
+        # we init the timer 
         self.frameP = Frame(self.fen)
+        # the main frame
         self.frameP.grid()
 
-        frame_temps = Frame(self.frameP , bd='0.5', bg = "#FF0000")
-        frame_temps.grid(column=0, row=0, padx=10, pady=10, sticky=N)
+        frame_time = Frame(self.frameP , bd='0.5', bg = "#FF0000")
+        frame_time.grid(column=0, row=0, padx=10, pady=10, sticky=N)
+        # Frame for the chrono
 
-        label_time = Label(frame_temps, text="Time :", font=self.font)
+        label_time = Label(frame_time, text="Time :", font=self.font)
         label_time.grid(column=0, row=0, padx=10, pady=5, sticky=N)
+        # the Label of the chrono
 
-        self.compteur_t = Label(frame_temps, text="0:00:00", font=self.font)
+        self.compteur_t = Label(frame_time, text="0:00:00", font=self.font)
         self.compteur_t.grid(column=0, row=1, padx=10, pady=5, sticky=N)
+        # the chrono
         self.fen.after(1000, self.update_time)
+        # each second we refresh the chrono
 
         frame_point = Frame(self.frameP , bd='0.5', bg='#E0E055')
         frame_point.grid(column=0, row=1, padx=5, pady=5, sticky=N)
+        # the frame for the counter
 
-        text = "Wrong : " + str(self.wrong)
-        self.label_wrong = Label(frame_point, text = text, font=self.font)
+        self.label_wrong = Label(frame_point, text = "Wrong : 0", font=self.font)
         self.label_wrong.grid(column=0, row=0, padx=5, pady=5, sticky=W)
+        # the counters of the wrong answer
 
-        text = "Right :   " + str(self.right)
-        self.label_right = Label(frame_point, text = text, font=self.font)
+        self.label_right = Label(frame_point, text = "Right :   0", font=self.font)
         self.label_right.grid(column=0, row=1, padx=5, pady=5, sticky=W)
+        # the counter of the right answer 
 
         frame_liste = Frame(self.frameP , bd='0.5', bg='#000FFF')
         frame_liste.grid(column=0, row=2, padx=5, pady=5, sticky=N)
+        # the frame of the liste of all the good answer 
 
         complete_label = Label(frame_liste, text="Liste:",font=self.font)
         complete_label.grid(column=0, row=0, padx=5, pady=5, sticky=N)
+        # the label above the slist
 
-        self.frame_liste2 = Frame(frame_liste, bd='0.5', bg='#E0E055')
-        self.frame_liste2.grid(column=0, row=1, padx=5, pady=5, sticky=N)
+        frame_liste2 = Frame(frame_liste, bd='0.5', bg='#E0E055')
+        frame_liste2.grid(column=0, row=1, padx=5, pady=5, sticky=N)
+        # frame that can let us use .pack()
 
-        scrollbarY = Scrollbar(self.frame_liste2, orient="vertical")
-        self.mylist = Listbox(self.frame_liste2 ,width=40, height=10, yscrollcommand=scrollbarY.set, bd=0)
+        scrollbarY = Scrollbar(frame_liste2, orient="vertical")
+        # we init the scrollbar
+        self.mylist = Listbox(frame_liste2 ,width=40, height=10, yscrollcommand=scrollbarY.set, bd=0)
         self.mylist.select_set(0)
+        # we create the list widget
         scrollbarY.config(command=self.mylist.yview)
         scrollbarY.pack(side=RIGHT, fill=BOTH)
         self.mylist.pack()
+        # we place the widget
 
     def update_time(self):
-        "Incrémente le compteur à chaque seconde"
+        """
+        function that updates the stopwatch every second
+        """
         now = default_timer() - self.start
+        # init the time pass betwen the start of the chrono
         minutes, seconds = divmod(now, 60) 
+        # we get the minute and second
         hours, minutes = divmod(minutes, 60)
-        str_time = "%d:%02d:%02d" % (hours, minutes, seconds)
+        # we get the hour 
+        str_time = "%02d:%02d:%02d" % (hours, minutes, seconds)
+        # we convert the time into a string format
         self.compteur_t.configure(text=str_time)
+        # we uptade the label with the new text
         if self.right == self.amount_right:
-            self.win()
+            # if the player have win we pass
+            pass
         else:
+            # if not , we call the function each second
             self.fen.after(1000, self.update_time)
 
     def update_wrong(self):
+        """
+        Function call when the player made a mistake
+        """
         self.wrong += 1
+        # we add 1 to the counter
         text = "Wrong : " + str(self.wrong)
         self.label_wrong.config(text = text)
+        # we update the label 
 
     def update_right(self):
+        """
+        Function call when the player found the cards
+        """
         self.right += 1
+        # we add 1 to the counter
         text = "Right : " + str(self.right)
         self.label_right.config(text = text)
+        # we update the label 
         if self.right == self.amount_right:
+            # if the player have find all of the cards we call the function for winning
             self.win()
-            pass
 
     def add_liste(self, data):
+        """
+        Function call to add data to the list widget
+
+            Parameters:
+                data, / => the data to add to the list
+        """
         self.mylist.insert(END, data)
 
     def win(self):
         """
-        condition pour si tu gagne 
+        Function call when you have win the game
         """
         self.frameP.grid_forget()
+        # we suppr the main frame
         img = PhotoImage(file="coupe.gif")
+        # we get the picture
         canvas = Canvas(self.fen)
         canvas.configure(width=img.width(), height=img.height())
         canvas.create_image(img.width()/2,img.height()/2,image=img)
-        canvas.image = img ## Association de l'image au canva.
+        # we creat the canvas 
+        canvas.image = img
+        # we add the picture to the canvas
         canvas.grid(row=0,column=0)
+        # we show it 
 
-        label_ = Label(self.fen, text="You win !!")
+        label_ = Label(self.fen, text="You win !!", font=self.font)
         label_.grid(row=1, column = 0)
+        # we add a label for saying YOU Wwin
 
-        boutton_ = Button(self.fen, text = "Quit", command=self.quitter)
+        boutton_ = Button(self.fen, text = "Quit", command=self.quitter, font=self.font)
         boutton_.grid(row=2, column = 0)
+        # we add a button for quitting
 
     def quitter(self):
+        """
+        function to quit the programme 
+        """
         sys.exit()
 
 class Memory():
