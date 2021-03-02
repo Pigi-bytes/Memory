@@ -165,44 +165,44 @@ class Coter():
 
 class Memory():
     """
-    Une classe pour gerer le jeu de memory
+    A class to manage the memory game
     """
     def __init__(self, fen, fen2, data):
-        
-        
+        """
+        init the class
+
+            Parameters:
+                fen, Tk.frame => the main frame for the memory game
+                fen2, Tk.frame => the secondary frame on the right 
+                data, list => all of the cards
+        """    
         self.right = 0
-        
-
-
+        # number of good answers
         self.fen = fen
-        # self.fen.grid()
-
-        # Creation de la frame qui va afficher tout les widgets 
         self.police = ('Helvetic', 8)
-        # font de l'applications
+        # font of the app
         self.data_carte1 = data[0] 
         self.data_carte2 = data[1]
-        # valeur des deuxiemes cartes
-        # Relier entre elle par leur index , exemple =>
-        # Si on cherche la valeur qui est store dans la liste (data_carte1) a l'emplacement x
-        # la valeur associer, dans la liste (carte2) sera presente a l'emplacement x  
+        # value of the second cards
+        # Connect to each other by their index, example =>
+        # If we look for the value which is store in the list (data_carte1) to place x
+        # the associated value, in the list (map2) will be present at location x
         self.data = self.data_carte1[:] 
         self.data.extend(self.data_carte2)
-        # on copie la liste self.data_carte1 localement
-        # on modifie la copie local en lui rajoutant la liste deux 
-        # pour en faire une liste de toute les valeurs 
+        # we copy the list self.data_carte1 locally
+        # we modify the local copy by adding list two to it
+        # to make it a list of all the values
         self.liste_button = []
-        # Liste qui contient la valeur et le boutton 
+        # List which contains all the buttons
         self.button_click = 0
-        # Variable qui alterne entre 3 valeurs : 
-        # 0: Aucune carte de lever, 1: une carte de lever
+        # Variable which alternates between 2 values:
+        # 0: No raise card, 1: one raise card
         self.valeur_1carte, self.valeur_2carte = None, None
-        # Variable qui a en memoire quelle bouton est retourner
-        
+        # Variable which has in memory which cards is return
         self.amount_right = len(self.data_carte1)
-
+        # the amount of good andwers
         self.coter = Coter(fen2, self.amount_right)
-        
+        # we creat a instance of the coter class
         self.create_button()
         # call de la fonction create button
 
@@ -211,149 +211,163 @@ class Memory():
         Function to creat all the button on the window
         """
         for i in range(len(self.data)):
-            # Repeter pour le nombre de boutton a crer 
-            # TODO : changer la maniere don est afficher le texte pour que sa rentre sur le
+            # Repeat for the number of buttons to create
             button = Button(self.fen, text = "", width=20, height=5, font = self.police,
                             bg='#FFFFFF', disabledforeground = '#000000', 
                             command=partial(self.button_press, i))
-            # on crer un bouton vide, avec une commande qui renvois une valeur, qui , associer a l'index 
-            # de la liste nous indique le bouton ( dans la liste ) 
-            # la fonction partial nous permet de donner un argument ( meme sic un button tkinter)
+            # we create an empty button, with a command which returns a value, which, associated with the index
+            # of the list tells us the button (in the list)
+            # the partial function allows us to give an argument (even if it a tkinter event)
             self.liste_button.append(button)
-            # on ajoute le bouton dans la liste 
+            # we add the button to the list
         self.affichage_boutton()
-        # on affiche tout ce beau monde 
+        # call tath for showing the button
     
     def affichage_boutton(self):
         """
-        Fonction pour afficher les boutons
+        Funtion to show all of the button
         """
         nbCarte = len(self.liste_button) 
-        # Le nombre de carte au totale 
+        # The number of cards in total
         nb_carte_quotient = nbCarte // 5 
-        # le nombre de fois que on peut faire des lignes de 5
-        # Renvois le quotien division euclidienne par 5
+        # the number of times we can make lines of 5
+        # Return the quotien Euclidean division by 5
         nb_carte_reste = nbCarte % 5
-        # le nombre de carte a rajouter apres, le reste de la divison euclidienne
-        # renvois le rste de la division euclidienne par 5
+        # the number of cards to add after, the rest of the Euclidean division
+        # returns the reste of the Euclidean division by 5
 
         liste_coord = []
-        # liste qui va contenir toute les coordonées 
+        # list which will contain all the coordinates
         for j in range(nb_carte_quotient):
-            # on repete le nombre de fois que on peut faire des lignes de 5
+           # we repeat the number of times we can make lines of 5
             for i in range(5):
                 liste_coord.append([i, j]) 
-                # on rajoute les coord dans une liste, que on rajoute dans la liste de coord
-        
+                # we add the coord in a list, that we add in the list of coord
         if nb_carte_reste != 0:
-            # si il reste des cartes a rajouter 
+            # if there are still cards to add
             j = nb_carte_quotient + 1
-            # on rajoute une colonne
+            # we add a row
             for i in range(nb_carte_reste):
-                # on repete sa le nombre de fois qu'il reste de carte a afficher 
+                # we repeat this the number of times there are cards left to display
                 liste_coord.append([i, j]) 
-                # on rajouter les coord dans une liste que on rajoute dans la liste de coord
+                # we add the coord in a list that we add in the list of coord
         
         random.shuffle(liste_coord)
-        # on randomise la liste de coord
+        # we randomize the coord list
         for i in range(len(liste_coord)):
-            # on repete sa le nombre de coordoner disponible fois  
+            # we repeat the number of coordinates available times
             self.liste_button[i].grid(column=liste_coord[i][0], row=liste_coord[i][1], padx=10, pady=10, sticky=N)
-            # on affiche les bouttons en fonction des coordonnes
+            # we display the buttons according to the coordinates
 
     def button_press(self, n):
         """
-        Fonction quand l'utilisateur appuis sur un bouton
+        Function call when a user press a button
+
+            Parameters:
+                n, int => allows us to know which button we clicked
+                          this is the index of the button in the button list
+                          the button is therefore in self.liste_button [n]
         """
         if self.button_click == 0:
-            # Si aucune carte est retourner 
+            # If no card is returned
             self.liste_button[n].configure(text = self.data[n])
-            # on affiche le texte attribuer au bouton dessus
+            # we display the text assign to the button above
             self.button_click = 1
-            # on indique que un bouton a ete cliquer
+            # we indicate that a button has been clicked
             self.valeur_1carte = n
-            # on indique quelle bouton a ete retourner 
+            # we indicate which button has been returned
         elif (self.button_click == 1) and (self.liste_button[self.valeur_1carte]) != self.liste_button[n]:
-            # desactivation des bouttons 
+            # otherwise if a card has already been raised, and you do not click on the same card
             for child in self.fen.winfo_children():
                 child['state'] = DISABLED
-
-            # Si une carte est deja retourner 
+            # we deactivate the buttons
             self.liste_button[n].configure(text = self.data[n])
-            # on affiche le texte attribuer au bouton dessus
+            # we display the text assign to the button above
             self.valeur_2carte = n
             carte1 = self.liste_button[self.valeur_1carte].cget('text')
             carte2 = self.liste_button[self.valeur_2carte].cget("text")
-            # on recupere les deux carte d'afficher
-
+            #We Recover The Two Cards ToD isplay
             self.button_click = 0
-            # on indique que 2 boutton on ete cliquer, => ont remet a 0 
-
+            # we indicate that 2 button we are to click, => we reset to button click to 0
             index_carte1 = self.data.index(carte1) 
-            # on regarde ou se trouve l'index de la carte numero 1 dans tout les donner ensemble
-            # si l'index de la carte 1 est plus grande que la longeur de la liste avec tout les donners
-            # on sais alors que l'index de la premiere carte est dans la partie 1 de la liste ,
-            # donc que la liste est self.data_carte1, sinon c'est dans self.data_carte2
+            # we look at where the index of card number 1 is found in all the data given together
+            # if the index of card 1 is greater than the length of the list with all the data
+            # we know then that the index of the first card is in part 1 of the list,
+            # so the list is self.data_card1, otherwise it's in self.data_carte2
             if index_carte1 < (len(self.data) / 2):
                 index_carte1 = self.data_carte1.index(carte1)
             else: index_carte1 = self.data_carte2.index(carte1)
-            
-            # on fait pareil mais pour la carte 2
+           
+           # we do the same but for card 2
             index_carte2 = self.data.index(carte2) 
             if index_carte2 < (len(self.data) / 2):
                 index_carte2 = self.data_carte1.index(carte2)
             else: index_carte2 = self.data_carte2.index(carte2)
 
             if index_carte1 == index_carte2:
-                # si les cartes vont ensemble 
+                # if the cards go together 
                 self.liste_button[self.valeur_1carte].config(bg="#008000")
                 self.liste_button[self.valeur_2carte].config(bg="#008000")
-                # on les affiches en vert
+                # we display them in green
                 self.fen.after(500, self.good)
-                # on attend 1.5s => apelle 
-                
+                # we wait 0.5s and say they are good
             else:
-                # si les cartes ne vont pas ensemble
+                #if the cards don't go together
                 self.liste_button[self.valeur_1carte].config(bg="#FF0000")
                 self.liste_button[self.valeur_2carte].config(bg="#FF0000")
-                # on les affiche en rouge 
+                # we display them in red
                 self.fen.after(800, self.wrong)
-                # on attend 1s => apelle 
+                # we wait 0.8s sand say they are good
             
     def wrong(self):
         """
-        call when carte are worng
+        function to call when the cards are wrong
         """
         self.liste_button[self.valeur_1carte].config(bg="#FFFFFF")
         self.liste_button[self.valeur_1carte].config(text=" ")
         self.valeur_1carte = None
-        # on remet la valeur de la carte1 a 0 
+        # we reset the value of card1 to 0
         self.liste_button[self.valeur_2carte].config(bg="#FFFFFF")
         self.liste_button[self.valeur_2carte].config(text=" ")
         self.valeur_2carte = None
-        # on remet la valeur de la carte2 a 0 
+       # we reset the value of card2 to 0
         for child in self.fen.winfo_children():
             child['state'] = NORMAL
+       # reactivation of buttons
         self.coter.update_wrong()
-        # reactivation des bouttons
+        # we update the other panel to tell that we have do a error
 
     def good(self):
-        data = [self.liste_button[self.valeur_1carte].cget('text'),self.liste_button[self.valeur_2carte].cget('text')]
+        """
+        function to call when the cards are right
+        """
+        data = [self.liste_button[self.valeur_1carte].cget('text'), self.liste_button[self.valeur_2carte].cget('text')]
+        # we recover what is written on the cards
         self.coter.add_liste(data)
+        # we update the list on the quotation
         self.liste_button[self.valeur_1carte].destroy()
         self.liste_button[self.valeur_2carte].destroy()
-        # destruction des bouttons
+        # we destruct the button
         self.coter.update_right()
+        # we update the good answer on the other
         self.right += 1
+        # add 1 to the correct answer counter
         if self.amount_right == self.right:
+            # if the number of good answer is equal to the number of good answer needed for winning
             self.win()
+            #we call the function for winning
         else:
+            # else if not, we reactivate the buttons
             for child in self.fen.winfo_children():
                 child['state'] = NORMAL
-                # reactivation des bout
+                # reactivation of buttons
 
     def win(self):
+        """
+        Unction to cal when winning
+        """
         self.fen.grid_forget()
+        # we delete the frame 
 
 class Applications():
     """
