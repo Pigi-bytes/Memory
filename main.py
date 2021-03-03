@@ -177,6 +177,7 @@ class Coter():
         """
         sys.exit()
 
+
 class Memory():
     """
     A class to manage the memory game
@@ -190,9 +191,25 @@ class Memory():
                 fen2, Tk.frame => the secondary frame on the right 
                 data, list => all of the cards
         """    
+
+        # we creat a canvas and a frame
+        self.canvas = Canvas(fen, width=1400, height=1000)
+        self.canvas.grid(row=0, column=0, sticky="nsew") 
+        self.fen = Frame(self.canvas,)
+        self.canvas.create_window(0, 0, window=self.fen, anchor='nw')
+        
+        # we create the scroll bar
+        photoScroll = Scrollbar(fen, orient=VERTICAL)
+        photoScroll.config(command=self.canvas.yview)
+        self.canvas.config(yscrollcommand=photoScroll.set)
+        photoScroll.grid(row=0, column=1, sticky="ns")
+
+        # we bind the scroll bar 
+        self.fen.bind("<Configure>", self.update_scrollregion)
+        
+
         self.right = 0
         # number of good answers
-        self.fen = fen
         self.police = ('helvetica', 10)
         # font of the app
         self.data_carte1 = data[0] 
@@ -219,6 +236,12 @@ class Memory():
         # we creat a instance of the coter class
         self.create_button()
         # call de la fonction create button
+
+    def update_scrollregion(self, event):
+        """
+        For update the scroll 
+        """
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
     def create_button(self):
         """
@@ -392,6 +415,7 @@ class Memory():
         self.fen.grid_forget()
         # we delete the frame 
 
+
 class Applications():
     """
     Class used to manage the applications
@@ -446,6 +470,7 @@ class Applications():
 
 
         jeuMemory = Memory(frame_principale, frame_secondaire, self.data)
+
 
 if __name__ == "__main__":
     root = Tk()

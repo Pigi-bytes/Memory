@@ -1,3 +1,5 @@
-a1 | a2
-b1 | b2 
-c1 | c2
+Carte 1 ; Carte 2 
+Carte 3 ; Carte 4
+Carte 5 ; Carte 6
+Carte 7 ; Carte 8
+Carte 9 ; Carte 10
