@@ -404,7 +404,6 @@ class Applications():
                 fen, Tk.frame => the main frame for the memory game
         """
         self.fen = fen
-        self.fen.minsize(800, 1000) 
         self.data = self.recuperations_carte()
         # the data of the cards
         self.fenetre_principale()
@@ -439,12 +438,12 @@ class Applications():
         """
         frame_principale = Frame(self.fen, bd="0.5")
         frame_principale.grid(column=0, row=0, padx=20, pady=10, sticky=N,rowspan=2)
+        # show the first frame
         
         frame_secondaire = Frame(self.fen, bd="0.5")
         frame_secondaire.grid(column=1, row=0, padx=20, pady=10, sticky=N)
-        # show the first frame
-
         # show the secound frame
+
 
         jeuMemory = Memory(frame_principale, frame_secondaire, self.data)
 
