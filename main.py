@@ -3,7 +3,7 @@ from functools import partial
 from tkinter import *
 import random
 import sys
-
+# limite 420 characters
 
 class Coter():
     """
@@ -31,7 +31,7 @@ class Coter():
         # the main frame
         self.frameP.grid()
 
-        frame_time = Frame(self.frameP , bd='0.5', bg = "#FF0000")
+        frame_time = Frame(self.frameP , bd='0.5')
         frame_time.grid(column=0, row=0, padx=10, pady=10, sticky=N)
         # Frame for the chrono
 
@@ -45,7 +45,7 @@ class Coter():
         self.fen.after(1000, self.update_time)
         # each second we refresh the chrono
 
-        frame_point = Frame(self.frameP , bd='0.5', bg='#E0E055')
+        frame_point = Frame(self.frameP , bd='0.5')
         frame_point.grid(column=0, row=1, padx=5, pady=5, sticky=N)
         # the frame for the counter
 
@@ -57,7 +57,7 @@ class Coter():
         self.label_right.grid(column=0, row=1, padx=5, pady=5, sticky=W)
         # the counter of the right answer 
 
-        frame_liste = Frame(self.frameP , bd='0.5', bg='#000FFF')
+        frame_liste = Frame(self.frameP , bd='0.5')
         frame_liste.grid(column=0, row=2, padx=5, pady=5, sticky=N)
         # the frame of the liste of all the good answer 
 
@@ -65,17 +65,21 @@ class Coter():
         complete_label.grid(column=0, row=0, padx=5, pady=5, sticky=N)
         # the label above the slist
 
-        frame_liste2 = Frame(frame_liste, bd='0.5', bg='#E0E055')
+        frame_liste2 = Frame(frame_liste, bd='0.5')
         frame_liste2.grid(column=0, row=1, padx=5, pady=5, sticky=N)
         # frame that can let us use .pack()
 
         scrollbarY = Scrollbar(frame_liste2, orient="vertical")
+        scrollbarX = Scrollbar(frame_liste2, orient="horizontal")
+
         # we init the scrollbar
-        self.mylist = Listbox(frame_liste2 ,width=40, height=10, yscrollcommand=scrollbarY.set, bd=0)
+        self.mylist = Listbox(frame_liste2 ,width=40, height=10, yscrollcommand=scrollbarY.set, xscrollcommand=scrollbarX.set, bd=0)
         self.mylist.select_set(0)
         # we create the list widget
         scrollbarY.config(command=self.mylist.yview)
         scrollbarY.pack(side=RIGHT, fill=BOTH)
+        scrollbarX.config(command=self.mylist.xview)
+        scrollbarX.pack(side=BOTTOM, fill=BOTH)
         self.mylist.pack()
         # we place the widget
 
@@ -136,6 +140,15 @@ class Coter():
         """
         Function call when you have win the game
         """
+        now = default_timer() - self.start
+        # init the time pass betwen the start of the chrono
+        minutes, seconds = divmod(now, 60) 
+        # we get the minute and second
+        hours, minutes = divmod(minutes, 60)
+        # we get the hour 
+        str_time = "%02d:%02d:%02d" % (hours, minutes, seconds)
+        # wee get the time of the player
+
         self.frameP.grid_forget()
         # we suppr the main frame
         img = PhotoImage(file="coupe.gif")
@@ -148,8 +161,9 @@ class Coter():
         # we add the picture to the canvas
         canvas.grid(row=0,column=0)
         # we show it 
-
-        label_ = Label(self.fen, text="You win !!", font=self.font)
+        
+        text = "you win in " + str_time
+        label_ = Label(self.fen, text=text, font=self.font)
         label_.grid(row=1, column = 0)
         # we add a label for saying YOU Wwin
 
@@ -179,7 +193,7 @@ class Memory():
         self.right = 0
         # number of good answers
         self.fen = fen
-        self.police = ('Helvetic', 8)
+        self.police = ('helvetica', 10)
         # font of the app
         self.data_carte1 = data[0] 
         self.data_carte2 = data[1]
@@ -212,9 +226,18 @@ class Memory():
         """
         for i in range(len(self.data)):
             # Repeat for the number of buttons to create
-            button = Button(self.fen, text = "", width=20, height=5, font = self.police,
-                            bg='#FFFFFF', disabledforeground = '#000000', 
-                            command=partial(self.button_press, i))
+            button = Button(self.fen, 
+                            text = "", 
+                            width=30, 
+                            height=15, 
+                            relief = "flat",
+                            font = self.police, 
+                            bg='#FFFFFF',
+                            disabledforeground = '#000000',
+                            wraplength= 200, 
+                            borderwidth = 0,
+                            # justify=LEFT,
+                            command=partial(self.button_press, i)) 
             # we create an empty button, with a command which returns a value, which, associated with the index
             # of the list tells us the button (in the list)
             # the partial function allows us to give an argument (even if it a tkinter event)
@@ -381,6 +404,7 @@ class Applications():
                 fen, Tk.frame => the main frame for the memory game
         """
         self.fen = fen
+        self.fen.minsize(800, 1000) 
         self.data = self.recuperations_carte()
         # the data of the cards
         self.fenetre_principale()
@@ -413,24 +437,16 @@ class Applications():
         """
         Fonction pour afficher la fenetre principal
         """
-        frame_secondaire = Frame(self.fen, bd="0.5", bg ="#5e35b1")
-        frame_secondaire.grid(column=2, row=0, padx=20, pady=10, sticky=N)
+        frame_principale = Frame(self.fen, bd="0.5")
+        frame_principale.grid(column=0, row=0, padx=20, pady=10, sticky=N,rowspan=2)
+        
+        frame_secondaire = Frame(self.fen, bd="0.5")
+        frame_secondaire.grid(column=1, row=0, padx=20, pady=10, sticky=N)
         # show the first frame
 
-        frame_principale = Frame(self.fen, bd="0.5", bg ="#4dd0e1")
-        frame_principale.grid(column=0, row=0, padx=20, pady=10, sticky=N, columnspan=2)
         # show the secound frame
 
         jeuMemory = Memory(frame_principale, frame_secondaire, self.data)
-
-#  TODO : optimizations 
-#  TODO : make the app more nice
-#  TODO : changer la maniere est afficher le texte pour que sa rentre sur le boutton
-#  TODO : App to add all of the texte
-
-
-
-
 
 if __name__ == "__main__":
     root = Tk()
