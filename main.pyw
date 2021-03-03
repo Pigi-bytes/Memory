@@ -3,6 +3,7 @@ from functools import partial
 from tkinter import *
 import random
 import sys
+
 # limite 420 characters
 
 class Coter():
