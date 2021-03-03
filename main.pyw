@@ -192,6 +192,8 @@ class Memory():
                 fen2, Tk.frame => the secondary frame on the right 
                 data, list => all of the cards
         """    
+        self.master = fen
+        # the master frame
 
         # we creat a canvas and a frame
         self.canvas = Canvas(fen, width=1400, height=1000)
@@ -413,7 +415,7 @@ class Memory():
         """
         Unction to cal when winning
         """
-        self.fen.grid_forget()
+        self.master.grid_forget()
         # we delete the frame 
 
 
